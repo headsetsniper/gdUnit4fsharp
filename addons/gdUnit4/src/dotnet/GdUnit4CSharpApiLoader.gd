@@ -61,9 +61,14 @@ static func is_api_loaded() -> bool:
 	# First we check if this is a Godot .NET runtime instance
 	if not ClassDB.class_exists("CSharpScript") or not is_engine_version_supported():
 		return false
-	# Second we check the C# project file exists
+	# Second we check the .NET project file exists (supports both .csproj and .fsproj)
 	var assembly_name: String = ProjectSettings.get_setting("dotnet/project/assembly_name")
-	if assembly_name.is_empty() or not FileAccess.file_exists("res://%s.csproj" % assembly_name):
+	if assembly_name.is_empty():
+		return false
+	# Check for either C# (.csproj) or F# (.fsproj) project file
+	var csproj_path := "res://%s.csproj" % assembly_name
+	var fsproj_path := "res://%s.fsproj" % assembly_name
+	if not FileAccess.file_exists(csproj_path) and not FileAccess.file_exists(fsproj_path):
 		return false
 
 	# Finally load the wrapper and check if the GdUnit4 assembly can be found
